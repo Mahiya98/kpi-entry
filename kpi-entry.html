@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KPI Data Entry &ndash; Month / Year wise</title>
+<style>
+:root{
+  --bg:#eef2f7;--card:#ffffff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;
+  --brand:#1d4ed8;--brand-2:#2563eb;--brand-soft:#eff6ff;
+  --exc:#16a34a;--acc:#d97706;--risk:#dc2626;--crit:#7f1d1d;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.topbar{position:sticky;top:0;z-index:40;background:linear-gradient(100deg,#0f172a,#1e3a8a 60%,#1d4ed8);color:#fff;padding:10px 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;box-shadow:0 2px 10px rgba(15,23,42,.25)}
+.topbar h1{font-size:16px;margin:0;font-weight:650;letter-spacing:.2px}
+.topbar .sub{font-size:11.5px;color:#bfdbfe}
+.spacer{flex:1}
+.btn{border:1px solid var(--line);background:#fff;color:#0f172a;border-radius:8px;padding:6px 11px;cursor:pointer;font-size:12.5px;white-space:nowrap;transition:.15s}
+.btn:hover{background:#f8fafc;border-color:#cbd5e1}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand-2)}
+.btn.ghost{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.35);color:#fff}
+.btn.ghost:hover{background:rgba(255,255,255,.22)}
+.btn.danger{color:#b91c1c;border-color:#fecaca;background:#fff5f5}
+.btn.submit{background:#16a34a;border-color:#16a34a;color:#fff;font-weight:650;box-shadow:0 2px 8px rgba(22,163,74,.4)}
+.btn.submit:hover{background:#15803d}
+.btn.submit:disabled{background:#94a3b8;border-color:#94a3b8;box-shadow:none;cursor:not-allowed}
+.pill.sub-ok{background:#dcfce7;border-color:#bbf7d0;color:#15803d}
+.pill.sub-draft{background:#fef3c7;border-color:#fde68a;color:#b45309}
+.submitbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:10px;padding:9px 13px;margin-bottom:12px;font-size:13px}
+.submitbar b{color:#14532d}
+.submitbar .muted{color:#4d7c5f}
+.btn.sm{padding:3px 8px;font-size:11.5px;border-radius:6px}
+.wrap{max-width:1560px;margin:0 auto;padding:14px 18px 60px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:650}
+select,input[type=text],input[type=month],input[type=url],input[type=number],textarea{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 9px;outline:none}
+select:focus,input:focus,textarea:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+select.big,input.big{padding:7px 10px;min-width:150px}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--brand-soft);border:1px solid #dbeafe;color:#1e40af;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700}
+.card .v{font-size:23px;font-weight:700;margin-top:3px;letter-spacing:-.5px}
+.card .d{font-size:11px;color:var(--muted);margin-top:1px}
+.card.exc .v{color:var(--exc)}.card.acc .v{color:var(--acc)}.card.risk .v{color:var(--risk)}.card.crit .v{color:var(--crit)}
+.tablewrap{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:72vh}
+table{border-collapse:separate;border-spacing:0;width:100%;min-width:1450px}
+thead th{position:sticky;top:0;z-index:5;background:#f8fafc;color:#334155;font-size:11px;text-transform:uppercase;letter-spacing:.5px;font-weight:700;padding:9px 8px;border-bottom:2px solid var(--line);text-align:left;white-space:nowrap}
+tbody td{border-bottom:1px solid var(--line);padding:5px 7px;vertical-align:middle;background:#fff}
+th:nth-child(7),td:nth-child(7){width:130px}
+tbody tr:hover td{background:#f8fbff}
+tr.grp td{background:#eef2ff;font-weight:700;font-size:11.5px;letter-spacing:.5px;text-transform:uppercase;color:#3730a3;position:sticky;left:0}
+td.kpiname{min-width:230px;font-weight:600}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td input.cell{width:100%;min-width:80px;border:1px solid transparent;background:transparent;border-radius:6px;padding:5px 7px}
+td input.cell:hover{border-color:var(--line);background:#fff}
+td input.cell:focus{background:#fff;border-color:var(--brand-2)}
+td input[data-f="a"]{min-width:112px;text-align:right;font-variant-numeric:tabular-nums}
+td input.link{min-width:170px}
+td input.wide{min-width:150px}
+.ach{font-weight:700;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.b-exc{background:#dcfce7;color:#15803d}
+.b-acc{background:#fef3c7;color:#b45309}
+.b-risk{background:#fee2e2;color:#b91c1c}
+.b-crit{background:#4c0519;color:#fecaca}
+.b-none{background:#f1f5f9;color:#94a3b8}
+.muted{color:var(--muted)}
+.tfoot{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:10px 4px;font-size:12.5px;color:#334155}
+.tfoot b{font-size:14px}
+.linkbtn{background:none;border:0;color:var(--brand);cursor:pointer;padding:0;font-size:11.5px;text-decoration:underline}
+.rowacts{display:flex;gap:4px}
+.empty{padding:34px;text-align:center;color:var(--muted)}
+/* modal */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;z-index:60;align-items:flex-start;justify-content:center;overflow:auto;padding:40px 16px}
+.mask.on{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:1080px;box-shadow:0 22px 60px rgba(0,0,0,.35);overflow:hidden}
+.modal .head{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);background:#f8fafc}
+.modal .head h3{margin:0;font-size:15px}
+.modal .body{padding:16px;max-height:75vh;overflow:auto}
+.modal .foot{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;background:#f8fafc;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.f label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px}
+.f input,.f select,.f textarea{width:100%}
+.help{font-size:12.5px;color:#334155}
+.help ol{padding-left:20px} .help li{margin-bottom:6px}
+.help code,pre.code{background:#0f172a;color:#e2e8f0;border-radius:8px;padding:2px 6px;font-size:12px}
+pre.code{padding:12px;overflow:auto;max-height:280px;white-space:pre;border:1px solid #1e293b}
+details{margin-top:10px}
+summary{cursor:pointer;font-weight:650;color:var(--brand)}
+#toast{position:fixed;right:18px;bottom:18px;z-index:99;display:flex;flex-direction:column;gap:8px}
+.msg{background:#0f172a;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:380px;border-left:4px solid var(--brand-2)}
+.msg.err{border-left-color:#ef4444}
+.msg.ok{border-left-color:#22c55e}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#22c55e}
+.dot.off{background:#f59e0b}
+@media print{
+  .topbar,.bar .btn,.rowacts,.mask,#toast,.no-print{display:none!important}
+  body{background:#fff}
+  .wrap{max-width:none;padding:0}
+  .tablewrap{max-height:none;overflow:visible;border:0}
+  table{min-width:0;font-size:10.5px}
+  thead th{position:static}
+  .card{border:1px solid #ccc}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div>
+    <h1>KPI Data Entry &mdash; Month / Year wise</h1>
+    <div class="sub">OPEX KPI tracker &middot; multi business-unit ready</div>
+  </div>
+  <div class="spacer"></div>
+  <span class="pill" id="submitPill"><span class="dot off"></span> Draft</span>
+  <span class="pill" id="syncPill"><span class="dot off"></span> Not synced</span>
+  <button class="btn ghost" id="btnPush">Save to Sheet</button>
+  <button class="btn ghost" id="btnPull">Load from Sheet</button>
+  <button class="btn ghost" id="btnSettings">Settings / Help</button>
+  <button class="btn submit" id="btnSubmit">✔ Submit Data</button>
+</header>
+
+<div class="wrap">
+
+  <div class="bar">
+    <div class="field"><label>Business Unit (SBU)</label>
+      <select id="sbuSel" class="big"></select>
+    </div>
+    <div class="field"><label>Month &ndash; Year</label>
+      <select id="monthSel" class="big"></select>
+    </div>
+    <div class="field"><label>New month</label>
+      <div style="display:flex;gap:6px">
+        <input type="month" id="monthNew" value="2026-09">
+        <button class="btn" id="btnAddMonth">Open</button>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="field"><label>KPI master</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn" id="btnMaster">Manage KPIs</button>
+        <button class="btn" id="btnAddSBU">+ SBU</button>
+        <button class="btn" id="btnCsv">Export CSV</button>
+        <button class="btn" id="btnPrint">Print</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="submitbar" id="submitBar" style="display:none"></div>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="tablewrap">
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th style="width:34px">#</th>
+          <th>KPI Name</th>
+          <th>Measure</th>
+          <th>Baseline</th>
+          <th>SRF</th>
+          <th style="text-align:right">KPI Target</th>
+          <th>Actual</th>
+          <th style="text-align:right">KPI Achievement</th>
+          <th>KPI Status</th>
+          <th>Supporting File</th>
+          <th>Root Cause</th>
+          <th>Action Plan</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">No KPIs for this SBU yet. Open <b>Manage KPIs</b> to add or copy a KPI master.</div>
+  </div>
+
+  <div class="tfoot" id="tfoot"></div>
+</div>
+
+<!-- SETTINGS / HELP -->
+<div class="mask" id="mSettings">
+  <div class="modal" style="max-width:860px">
+    <div class="head"><h3>Settings &amp; Help</h3><div class="spacer"></div><button class="btn sm" data-close>Close</button></div>
+    <div class="body">
+      <div class="grid2">
+        <div class="f">
+          <label>Google Sheet Web App URL (Apps Script /exec)</label>
+          <input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/AKfy.../exec">
+          <div class="muted" style="font-size:11.5px;margin-top:4px">Paste the URL after deploying the Apps Script below.</div>
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            <button class="btn" id="btnSaveUrl">Save URL</button>
+            <button class="btn" id="btnTest">Test connection</button>
+          </div>
+        </div>
+        <div class="f">
+          <label>Sync</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn primary" id="btnPush2">Push current month</button>
+            <button class="btn" id="btnPull2">Pull all data</button>
+            <button class="btn" id="btnPushMaster">Push KPI master</button>
+          </div>
+          <div class="muted" style="font-size:11.5px;margin-top:6px" id="lastSync">Never synced.</div>
+        </div>
+        <div class="f">
+          <label>Backup</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn" id="btnBackup">Download JSON</button>
+            <label class="btn" style="cursor:pointer">Restore JSON<input type="file" id="fileRestore" accept="application/json" style="display:none"></label>
+            <button class="btn danger" id="btnReset">Reset to sample data</button>
+          </div>
+        </div>
+        <div class="f">
+          <label>Data storage</label>
+          <div class="muted" style="font-size:12px">Entries are kept in this browser (localStorage) and pushed to your Google Sheet when you press <b>Save to Sheet</b> or <b>Submit Data</b>.</div>
+        </div>
+      </div>
+
+      <div class="help" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+        <b>Connect to Google Sheet &mdash; 4 steps</b>
+        <ol>
+          <li>Open your Google Sheet &rarr; <b>Extensions &rarr; Apps Script</b>, delete any code and paste the script below.</li>
+          <li>Click <b>Deploy &rarr; New deployment</b> &rarr; type <b>Web app</b> &rarr; Execute as <b>Me</b>, Access: <b>Anyone</b> &rarr; Deploy, then copy the <b>/exec</b> URL.</li>
+          <li>Paste that URL above, press <b>Save URL</b>, then <b>Test connection</b>. Use <b>Save to Sheet</b> any time to keep a draft copy of the selected month + SBU.</li>
+          <li>When the month is complete, press <b>✔ Submit Data</b> — the rows are upserted to the sheet with a <b>Submitted At</b> timestamp and the month is locked (use <b>Reopen</b> if you must edit again).</li>
+        </ol>
+        <div class="muted" style="font-size:12px">The script creates two tabs automatically: <b>KPI Data</b> (month-year entries) and <b>KPI Master</b>. Re-upload a new version of the script if you change it (Deploy &rarr; Manage deployments &rarr; Edit).</div>
+        <details>
+          <summary>Click to view / copy the Apps Script code (also saved as Code.gs)</summary>
+          <pre class="code" id="gsCode"></pre>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KPI MASTER -->
+<div class="mask" id="mMaster">
+  <div class="modal">
+    <div class="head"><h3>KPI Master &mdash; <span id="masterSbu"></span></h3><div class="spacer"></div><button class="btn sm" data-close>Close</button></div>
+    <div class="body">
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:flex-end">
+        <button class="btn primary" id="btnAddKpi">+ Add KPI</button>
+        <div class="f" style="min-width:170px"><label>Copy KPIs from SBU</label>
+          <div style="display:flex;gap:6px"><select id="copyFrom"></select><button class="btn" id="btnCopy">Copy</button></div>
+        </div>
+        <div class="spacer"></div>
+        <div class="muted" style="font-size:12px">Direction: <b>&uarr;</b> higher is better &middot; <b>&darr;</b> lower is better &middot; Basis: <b>abs</b> = target value, <b>rel</b> = % change vs baseline &middot; Weight % feeds the weighted score.</div>
+      </div>
+      <div style="overflow:auto">
+        <table style="min-width:1150px">
+          <thead><tr>
+            <th>KPI Name</th><th>Dept</th><th>Section</th><th>Measure</th><th>Baseline</th><th>SRF</th><th>Target</th>
+            <th>Dir</th><th>Basis</th><th>Weight %</th><th>Calc</th><th></th>
+          </tr></thead>
+          <tbody id="masterBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="foot"><button class="btn primary" data-close>Done</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============================ Apps Script backend ============================ */
+const GS_CODE = [
+"/**",
+" * KPI Data Entry - Google Sheet backend (paste into Extensions > Apps Script)",
+" * Deploy: Deploy > New deployment > Web app > Execute as: Me > Access: Anyone",
+" */",
+"var DATA_SHEET  = 'KPI Data';",
+"var MASTER_SHEET = 'KPI Master';",
+"var DATA_HEADERS = ['Month-Year','SBU','Department','Section','KPI Name','Measure KPI','Baseline','SRF','KPI Target','Direction','Basis','Weight %','Actual','KPI Achievement','KPI Status','Supporting File','Root Cause','Action Plan','Remarks','Submitted At','Updated At'];",
+"var MASTER_HEADERS = ['SBU','Department','Section','KPI Name','Measure KPI','Baseline','SRF','KPI Target','Direction','Basis','Weight %','Calc','Updated At'];",
+"",
+"function doPost(e) {",
+"  try {",
+"    var p = JSON.parse(e.postData.contents);",
+"    if (p.action === 'save')       return json_({ ok: true, saved: saveRows_(p.rows || []) });",
+"    if (p.action === 'saveMaster') return json_({ ok: true, saved: saveMaster_(p.kpis || []) });",
+"    if (p.action === 'clearMonth') return json_({ ok: true, cleared: clearMonth_(p.month, p.sbu) });",
+"    return json_({ ok: false, error: 'Unknown action: ' + p.action });",
+"  } catch (err) { return json_({ ok: false, error: String(err) }); }",
+"}",
+"",
+"function doGet(e) {",
+"  try {",
+"    var a = (e && e.parameter && e.parameter.action) || 'list';",
+"    if (a === 'ping') return json_({ ok: true, msg: 'connected', spreadsheet: SpreadsheetApp.getActiveSpreadsheet().getName() });",
+"    if (a === 'list') return json_({ ok: true, rows: readAll_(DATA_SHEET, DATA_HEADERS), master: readAll_(MASTER_SHEET, MASTER_HEADERS) });",
+"    return json_({ ok: false, error: 'Unknown action: ' + a });",
+"  } catch (err) { return json_({ ok: false, error: String(err) }); }",
+"}",
+"",
+"function json_(obj) {",
+"  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);",
+"}",
+"",
+"function sheet_(ss, name, headers) {",
+"  var sh = ss.getSheetByName(name);",
+"  if (!sh) {",
+"    sh = ss.insertSheet(name);",
+"    sh.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold').setBackground('#1d4ed8').setFontColor('#ffffff');",
+"    sh.setFrozenRows(1);",
+"  }",
+"  return sh;",
+"}",
+"",
+"function key_(row) { return row[0] + '||' + row[1] + '||' + row[4]; }",
+"",
+"function saveRows_(rows) {",
+"  var ss = SpreadsheetApp.getActiveSpreadsheet();",
+"  var sh = sheet_(ss, DATA_SHEET, DATA_HEADERS);",
+"  var index = {};",
+"  var last = sh.getLastRow();",
+"  if (last > 1) {",
+"    var old = sh.getRange(2, 1, last - 1, DATA_HEADERS.length).getValues();",
+"    for (var i = 0; i < old.length; i++) { if (old[i][0]) index[key_(old[i])] = i + 2; }",
+"  }",
+"  var now = new Date();",
+"  for (var r = 0; r < rows.length; r++) {",
+"    var row = normalize_(rows[r], DATA_HEADERS);",
+"    row[row.length - 1] = now;",
+"    var k = key_(row);",
+"    if (index[k]) { sh.getRange(index[k], 1, 1, DATA_HEADERS.length).setValues([row]); }",
+"    else { sh.appendRow(row); }",
+"  }",
+"  return rows.length;",
+"}",
+"",
+"function saveMaster_(kpis) {",
+"  var ss = SpreadsheetApp.getActiveSpreadsheet();",
+"  var sh = sheet_(ss, MASTER_SHEET, MASTER_HEADERS);",
+"  var index = {};",
+"  var last = sh.getLastRow();",
+"  if (last > 1) {",
+"    var old = sh.getRange(2, 1, last - 1, MASTER_HEADERS.length).getValues();",
+"    for (var i = 0; i < old.length; i++) { if (old[i][0]) index[old[i][0] + '||' + old[i][3]] = i + 2; }",
+"  }",
+"  var now = new Date();",
+"  for (var r = 0; r < kpis.length; r++) {",
+"    var k = kpis[r];",
+"    var row = [k.sbu, k.dept, k.sec, k.name, k.measure, k.baseline, k.srf, k.target, k.dir, k.basis, k.weight, k.calc || '', now];",
+"    var key = row[0] + '||' + row[3];",
+"    if (index[key]) { sh.getRange(index[key], 1, 1, MASTER_HEADERS.length).setValues([row]); }",
+"    else { sh.appendRow(row); }",
+"  }",
+"  return kpis.length;",
+"}",
+"",
+"function clearMonth_(month, sbu) {",
+"  var ss = SpreadsheetApp.getActiveSpreadsheet();",
+"  var sh = ss.getSheetByName(DATA_SHEET);",
+"  if (!sh || sh.getLastRow() < 2) return 0;",
+"  var vals = sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues();",
+"  var n = 0;",
+"  for (var i = vals.length - 1; i >= 0; i--) {",
+"    if (String(vals[i][0]) === String(month) && String(vals[i][1]) === String(sbu)) { sh.deleteRow(i + 2); n++; }",
+"  }",
+"  return n;",
+"}",
+"",
+"function normalize_(obj, headers) {",
+"  var out = [];",
+"  for (var i = 0; i < headers.length; i++) { var v = obj[headers[i]]; out.push(v === undefined || v === null ? '' : v); }",
+"  return out;",
+"}",
+"",
+"function readAll_(name, headers) {",
+"  var ss = SpreadsheetApp.getActiveSpreadsheet();",
+"  var sh = ss.getSheetByName(name);",
+"  if (!sh) return [];",
+"  var last = sh.getLastRow();",
+"  if (last < 2) return [];",
+"  var vals = sh.getRange(2, 1, last - 1, headers.length).getValues();",
+"  var out = [];",
+"  for (var i = 0; i < vals.length; i++) {",
+"    var o = {};",
+"    for (var j = 0; j < headers.length; j++) o[headers[j]] = vals[i][j];",
+"    out.push(o);",
+"  }",
+"  return out;",
+"}"
+].join("\n");
+
+/* ============================ constants ============================ */
+const LS_KEY = "kpi_entry_v1";
+const SBUS = ["ACCL","AIL","APFIL","ARMCL","MRML","FAL","AAFL","AEFML","ABSL"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const STATUS = {
+  excellent:{cls:"b-exc", label:"\uD83D\uDFE2 Excellent"},
+  acceptable:{cls:"b-acc", label:"\uD83D\uDFE1 Acceptable"},
+  risk:{cls:"b-risk", label:"\uD83D\uDD34 Risk"},
+  critical:{cls:"b-crit", label:"\uD83D\uDEA8 Critical"}
+};
+
+/* ============================ seed ============================ */
+function seed(){
+  const K = (id,name,measure,baseline,srf,target,dir,basis,weight,calc)=>({
+    id, sbu:"ACCL", dept:"Operations", sec:"OPEX", name, measure, baseline, srf, target,
+    dir, basis, weight, calc:calc||""
+  });
+  const kpis = [
+    K("k01","Operational Efficiency Savings (BDT)","BDT","884546","Monthly","1,149,910","high","abs",0),
+    K("k02","Manpower Savings","BDT","N/A","Monthly","","high","abs",0),
+    K("k03","OT","BDT","987606","Monthly","850,000","low","abs",0),
+    K("k04","Wages","BDT","1916188","Monthly","1,724,569","low","abs",0),
+    K("k05","Kaizen Savings","BDT","353412","Monthly","353,412","high","abs",0),
+    K("k06","Wastage Sell","BDT","25000","Monthly","25,000","high","abs",0),
+    K("k07","OEE Improvement","%","56","Monthly","10","high","rel",0),
+    K("k08","Cycle Time Reduction","%","","Yearly","10","high","rel",0),
+    K("k09","5S Audit","%","65","Monthly","70","high","abs",25),
+    K("k10","QCP Audit","Value","50","Monthly","60","high","abs",15),
+    K("k11","No. of Idea","Value","5","Monthly","8","high","abs",15),
+    K("k12","No of Kaizen Implemented","Value","3","Monthly","5","high","abs",25),
+    K("k13","Process Standardization Index","Value","N/A","Monthly","2","high","abs",0),
+    K("k14","Process Improvement Project%","%","N/A","Quarterly","95","high","abs",0),
+    K("k15","Training","Value","1","Monthly","2","high","abs",20),
+    K("k16","Manufacturing Culture Development Index","%","","Monthly","85","high","abs",0,"weighted"),
+    K("k17","Capacity Increase VRM-1","%","122","Yearly","5","high","rel",0),
+    K("k18","Capacity Increase VRM-2","%","200","Yearly","5","high","rel",0)
+  ];
+  const E = (id,a,link,cause)=>({a:a||"",link:link||"",cause:cause||"",act:"",rem:"",ach:"",st:""});
+  const e202608 = {
+    k01: E("k01","2649712.75"),
+    k05: E("k05","75144"),
+    k07: E("k07","62.6","https://docs.google.com/spreadsheets/d/1NzcGrUHk7N4FSVGpAp9ZQ_H7TbpmX92YTtaJSnMx8Hg/edit?usp=sharing"),
+    k09: E("k09","81.51","https://docs.google.com/spreadsheets/d/1n9zIZrvbxOauoYVqCKEzBFHjMxN7UN9H0bYucEfa_ro/edit?usp=sharing"),
+    k10: E("k10","52","https://docs.google.com/spreadsheets/d/1vmGLAXeQnIG6bs9xrdetoxj1Hj-qquH9l-V6cjXy7ag/edit?usp=sharing"),
+    k11: E("k11","6","https://docs.google.com/spreadsheets/d/1czBchB66KWeCm4nWBBlaytCrI2nFABRIa3gPZ7cKXNE/edit?usp=sharing"),
+    k12: E("k12","2","https://docs.google.com/spreadsheets/d/1czBchB66KWeCm4nWBBlaytCrI2nFABRIa3gPZ7cKXNE/edit?usp=sharing"),
+    k13: E("k13","2","https://drive.google.com/file/d/1TQ9g9P5VdBtpsq-OU2Vyx34_Nz7yIWCI/view?usp=sharing"),
+    k14: E("k14","95"),
+    k15: E("k15","2","https://docs.google.com/spreadsheets/d/1F-AGdpxoiab_H1axc9hG-corEoOjvCfWegOz-_2IMqI/edit?usp=sharing"),
+    k17: E("k17"),
+    k18: E("k18")
+  };
+  e202608.k18.cause = "VRM-2, third roller problem, thats why VRM-2 had to run with two roller results lower feed rate. Considering the current situation with the revised SMV of VRM-2, OEE is 76.46%";
+  return {
+    version:3,
+    sbus:SBUS.slice(),
+    months:["2026-08","2026-09"],
+    defaultMonth:"2026-08",
+    kpis,
+    entries:{"2026-08":e202608,"2026-09":{}},
+    submits:{},
+    cfg:{url:"",lastSync:""}
+  };
+}
+
+/* ============================ state ============================ */
+let state = load();
+let curSbu = state.sbus[0] || "ACCL";
+let curMonth = state.defaultMonth || state.months[0];
+
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      const s = JSON.parse(raw);
+      if(s && s.kpis){
+        s.submits = s.submits || {};
+        s.entries = s.entries || {};
+        s.cfg = s.cfg || {url:"",lastSync:""};
+        if(!(s.version >= 3)){
+          s.sbus = SBUS.concat((s.sbus||[]).filter(c=>SBUS.indexOf(c)===-1));
+          s.version = 3;
+          localStorage.setItem(LS_KEY, JSON.stringify(s));
+        }
+        return s;
+      }
+    }
+  }catch(e){}
+  const s = seed(); localStorage.setItem(LS_KEY, JSON.stringify(s)); return s;
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function uid(){ return "k" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+/* ============================ helpers ============================ */
+function num(v){
+  if(v===null||v===undefined) return null;
+  const s = String(v).replace(/[,\s%]/g,"");
+  if(s===""||s.toUpperCase()==="N/A"||s.toUpperCase()==="NA") return null;
+  const n = parseFloat(s);
+  return isNaN(n)?null:n;
+}
+function fmtMonth(m){
+  if(!m) return "";
+  const p = m.split("-"); return MONTHS[parseInt(p[1],10)-1] + " " + p[0];
+}
+function absTarget(k){
+  const t = num(k.target);
+  if(t===null) return null;
+  const b = num(k.baseline);
+  if(k.basis==="rel" && b!==null) return k.dir==="low" ? b*(1-t/100) : b*(1+t/100);
+  return t;
+}
+function calcActual(k){
+  if(k.calc==="weighted"){
+    let s=0,w=0;
+    state.kpis.filter(x=>x.sbu===k.sbu && x.id!==k.id && x.calc!=="weighted" && num(x.weight)!==null && num(x.weight)>0).forEach(x=>{
+      const a = achievementOf(x, entryOf(curMonth,x.id).a);
+      if(a!==null){ s += a*num(x.weight); w += num(x.weight); }
+    });
+    return w>0 ? String(+(s/w).toFixed(8)) : "";
+  }
+  return null;
+}
+function achievementOf(k, actualRaw){
+  if(k.calc==="weighted"){
+    const v = num(calcActual(k));
+    const t = num(k.target);
+    return (v===null||t===null||t===0)?null:v/t*100;
+  }
+  const a = num(actualRaw), t = absTarget(k);
+  if(a===null||t===null||t===0) return null;
+  if(k.dir==="low"){ if(a===0) return null; return t/a*100; }
+  return a/t*100;
+}
+function statusOf(pct){
+  if(pct===null) return null;
+  if(pct>=95) return "excellent";
+  if(pct>=85) return "acceptable";
+  if(pct>=70) return "risk";
+  return "critical";
+}
+function entryOf(month,id){
+  if(!state.entries[month]) state.entries[month]={};
+  if(!state.entries[month][id]) state.entries[month][id]={a:"",link:"",cause:"",act:"",rem:"",ach:"",st:""};
+  return state.entries[month][id];
+}
+function kpiList(sbu){ return state.kpis.filter(k=>k.sbu===sbu); }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function pctTxt(p){ return p===null?"":p.toFixed(2)+"%"; }
+function toast(msg,type){
+  const d=document.createElement("div"); d.className="msg "+(type||"");
+  d.textContent=msg; document.getElementById("toast").appendChild(d);
+  setTimeout(()=>{d.style.opacity="0";d.style.transition=".4s";setTimeout(()=>d.remove(),400)},3600);
+}
+
+/* ============================ render ============================ */
+function render(){
+  renderSelectors(); renderCards(); renderTable(); renderFoot(); syncPill(); renderSubmitState();
+}
+function submitKey(month,sbu){ return month+"|"+sbu; }
+function subTime(month,sbu){ return (state.submits||{})[submitKey(month,sbu)] || ""; }
+function isSub(month,sbu){ return !!subTime(month,sbu); }
+function renderSelectors(){
+  const s=document.getElementById("sbuSel");
+  s.innerHTML = state.sbus.map(c=>`<option value="${esc(c)}"${c===curSbu?" selected":""}>${esc(c)}</option>`).join("");
+  const ms=[...state.months].sort().reverse();
+  document.getElementById("monthSel").innerHTML = ms.map(m=>`<option value="${m}"${m===curMonth?" selected":""}>${fmtMonth(m)}</option>`).join("");
+}
+function renderCards(){
+  const ks=kpiList(curSbu);
+  let sum=0,n=0,wsum=0,wscore=0;
+  const c={excellent:0,acceptable:0,risk:0,critical:0};
+  ks.forEach(k=>{
+    const e=entryOf(curMonth,k.id);
+    const p=achievementOf(k, k.calc==="weighted"?calcActual(k):e.a);
+    if(p!==null){ sum+=p; n++; const w=num(k.weight)||0; if(w>0){wsum+=w;wscore+=p*w;} }
+    const st=statusOf(p); if(st) c[st]++;
+  });
+  const overall=n?sum/n:null;
+  const weighted=wsum?wscore/wsum:null;
+  document.getElementById("cards").innerHTML = [
+    card("Overall Achievement", pctTxt(overall), n+" KPIs measured", ""),
+    card("Weighted Score", weighted===null?"-":pctTxt(weighted), wsum?"weights total "+wsum+"%":"no weights set", ""),
+    card("Excellent", c.excellent, "≥ 95%", "exc"),
+    card("Acceptable", c.acceptable, "85% – 94.99%", "acc"),
+    card("Risk", c.risk, "70% – 84.99%", "risk"),
+    card("Critical", c.critical, "< 70%", "crit")
+  ].join("");
+}
+function card(k,v,d,cls){ return `<div class="card ${cls}"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`; }
+
+function renderTable(){
+  const ks=kpiList(curSbu);
+  const tb=document.getElementById("tbody");
+  document.getElementById("empty").style.display = ks.length?"none":"block";
+  let html="", lastGroup="";
+  ks.forEach((k,i)=>{
+    const grp = (k.dept||"")+" / "+(k.sec||"");
+    if(grp!==lastGroup){ html+=`<tr class="grp"><td colspan="13">${esc(grp)} &middot; ${esc(curSbu)}</td></tr>`; lastGroup=grp; }
+    const e=entryOf(curMonth,k.id);
+    const actual = k.calc==="weighted" ? calcActual(k) : e.a;
+    const p = achievementOf(k, actual);
+    const st = statusOf(p);
+    const shown = p===null ? (e.ach||"") : pctTxt(p);
+    const badge = st ? STATUS[st] : (e.st? STATUS[statusKey(e.st)] || {cls:"b-none",label:e.st} : {cls:"b-none",label:"—"});
+    const L = isSub(curMonth,curSbu) ? " disabled" : "";
+    html += `<tr data-id="${k.id}">
+      <td class="muted">${i+1}</td>
+      <td class="kpiname" title="${esc(k.name)}">${esc(k.name)}${k.calc==="weighted"?' <span class="muted" style="font-weight:400;font-size:11px">(auto weighted)</span>':""}</td>
+      <td>${esc(k.measure)}</td>
+      <td class="num">${esc(k.baseline)}</td>
+      <td>${esc(k.srf)}</td>
+      <td class="num">${esc(k.target)}</td>
+      <td>${k.calc==="weighted"
+            ? `<input class="cell" style="text-align:right;font-weight:650" value="${esc(actual)}" readonly title="Calculated from weighted KPIs">`
+            : `<input class="cell" data-f="a" value="${esc(e.a)}" inputmode="decimal" placeholder="—"${L}>`}</td>
+      <td class="num ach">${esc(shown)}</td>
+      <td><span class="badge ${badge.cls}">${esc(badge.label)}</span></td>
+      <td><input class="cell link" data-f="link" value="${esc(e.link)}" placeholder="https://…"${L}></td>
+      <td><input class="cell wide" data-f="cause" value="${esc(e.cause)}" placeholder="—"${L}></td>
+      <td><input class="cell wide" data-f="act" value="${esc(e.act)}" placeholder="—"${L}></td>
+      <td><input class="cell wide" data-f="rem" value="${esc(e.rem)}" placeholder="—"${L}></td>
+    </tr>`;
+  });
+  tb.innerHTML=html;
+}
+function statusKey(label){
+  for(const k in STATUS) if(STATUS[k].label===label) return k;
+  return null;
+}
+function renderFoot(){
+  const ks=kpiList(curSbu);
+  let filled=0;
+  ks.forEach(k=>{ if(num(k.calc==="weighted"?calcActual(k):entryOf(curMonth,k.id).a)!==null) filled++; });
+  const sub=isSub(curMonth,curSbu);
+  document.getElementById("tfoot").innerHTML =
+    `<span><b>${fmtMonth(curMonth)}</b> · ${esc(curSbu)} · ${ks.length} KPIs · <b>${filled}</b> with actuals</span>
+     <span class="muted">Achievement &amp; Status are calculated automatically · fill the data then press <b>Submit Data</b> to send it to Google Sheet</span>
+     ${sub?`<span style="color:#15803d;font-weight:650">✔ Submitted ${esc(subTime(curMonth,curSbu))}</span>`:`<span style="color:#b45309;font-weight:650">● Draft — not submitted</span>`}`;
+}
+function renderSubmitState(){
+  const t=subTime(curMonth,curSbu);
+  const pill=document.getElementById("submitPill");
+  pill.className="pill "+(t?"sub-ok":"sub-draft");
+  pill.innerHTML = t ? `<span class="dot"></span> Submitted` : `<span class="dot off"></span> Draft`;
+  const bar=document.getElementById("submitBar");
+  const btn=document.getElementById("btnSubmit");
+  const ks=kpiList(curSbu);
+  let filled=0; ks.forEach(k=>{ if(num(k.calc==="weighted"?calcActual(k):entryOf(curMonth,k.id).a)!==null) filled++; });
+  if(t){
+    bar.style.display="flex";
+    bar.innerHTML=`<b>✔ Submitted</b> <span>${fmtMonth(curMonth)} · ${esc(curSbu)} · ${filled}/${ks.length} actuals filled</span>
+      <span class="muted">Submitted on ${esc(t)} — this month is locked.</span><span class="spacer" style="flex:1"></span>
+      <button class="btn sm" id="btnReopen">Reopen for editing</button>`;
+    document.getElementById("btnReopen").onclick=reopenMonth;
+    btn.disabled=true; btn.textContent="✔ Submitted";
+  }else{
+    bar.style.display="none"; bar.innerHTML="";
+    btn.disabled=false; btn.innerHTML="✔ Submit Data";
+  }
+}
+function syncPill(){
+  const ls=state.cfg.lastSync;
+  const el=document.getElementById("syncPill");
+  el.innerHTML = ls ? `<span class="dot"></span> Synced ${esc(ls)}` : `<span class="dot off"></span> Not synced`;
+}
+
+/* ============================ events ============================ */
+document.getElementById("tbody").addEventListener("input", ev=>{
+  const inp=ev.target.closest("input[data-f]"); if(!inp) return;
+  if(isSub(curMonth,curSbu)) return;
+  const tr=inp.closest("tr"); const id=tr.dataset.id;
+  const k=state.kpis.find(x=>x.id===id); if(!k) return;
+  const e=entryOf(curMonth,id);
+  e[inp.dataset.f]=inp.value;
+  if(inp.dataset.f==="a") e.ach="";
+  save();
+  refreshRow(tr,k); renderCards(); renderFoot();
+});
+document.getElementById("tbody").addEventListener("keydown", ev=>{
+  if(ev.key!=="Enter") return;
+  const inp=ev.target.closest("input[data-f='a']"); if(!inp) return;
+  ev.preventDefault();
+  const all=[...document.querySelectorAll("input[data-f='a']")];
+  const i=all.indexOf(inp); if(i>-1 && all[i+1]) all[i+1].focus();
+});
+function refreshRow(tr,k){
+  const actual = k.calc==="weighted" ? calcActual(k) : entryOf(curMonth,k.id).a;
+  const p=achievementOf(k,actual); const st=statusOf(p);
+  const cells=tr.children;
+  if(k.calc==="weighted" && cells[6]) cells[6].querySelector("input").value=actual||"";
+  cells[7].textContent = p===null ? (entryOf(curMonth,k.id).ach||"") : pctTxt(p);
+  const b = st ? STATUS[st] : {cls:"b-none",label:"—"};
+  cells[8].innerHTML = `<span class="badge ${b.cls}">${esc(b.label)}</span>`;
+}
+
+document.getElementById("sbuSel").addEventListener("change", e=>{ curSbu=e.target.value; render(); });
+document.getElementById("monthSel").addEventListener("change", e=>{ curMonth=e.target.value; render(); });
+document.getElementById("btnAddMonth").addEventListener("click", ()=>{
+  const v=document.getElementById("monthNew").value;
+  if(!v){ toast("Pick a month first","err"); return; }
+  if(!state.months.includes(v)) state.months.push(v);
+  if(!state.entries[v]) state.entries[v]={};
+  state.defaultMonth=v; curMonth=v; save(); render();
+  toast("Opened "+fmtMonth(v),"ok");
+});
+document.getElementById("btnAddSBU").addEventListener("click", ()=>{
+  const code=(window.prompt("Extra SBU code to add (standard list is already in the dropdown):")||"").trim().toUpperCase();
+  if(!code) return;
+  if(!state.sbus.includes(code)) state.sbus.push(code);
+  curSbu=code; save(); render();
+  toast("SBU "+code+" added. Use Manage KPIs → Copy KPIs to fill it.","ok");
+});
+
+/* CSV export */
+document.getElementById("btnCsv").addEventListener("click", ()=>{
+  const ks=kpiList(curSbu);
+  const head=["Month-Year","SBU","Department","Section","KPI Name","Measure KPI","Baseline","SRF","KPI Target","Actual","KPI Achievement","KPI Status","Supporting File","Root Cause","Action Plan","Remarks","Submitted At"];
+  const rows=[head];
+  ks.forEach(k=>{
+    const e=entryOf(curMonth,k.id);
+    const actual=k.calc==="weighted"?calcActual(k):e.a;
+    const p=achievementOf(k,actual); const st=statusOf(p);
+    rows.push([fmtMonth(curMonth),curSbu,k.dept,k.sec,k.name,k.measure,k.baseline,k.srf,k.target,actual,
+      p===null?(e.ach||""):pctTxt(p), st?STATUS[st].label:(e.st||""), e.link,e.cause,e.act,e.rem,subTime(curMonth,curSbu)]);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${String(c==null?"":c).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  dl(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}), `KPI_${curSbu}_${curMonth}.csv`);
+  toast("CSV downloaded","ok");
+});
+document.getElementById("btnPrint").addEventListener("click", ()=>window.print());
+function dl(blob,name){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},400);
+}
+
+/* modals */
+function openMask(id){ document.getElementById(id).classList.add("on"); }
+function closeMask(el){ el.classList.remove("on"); }
+document.querySelectorAll(".mask").forEach(m=>{
+  m.addEventListener("click", e=>{
+    if(e.target===m || e.target.hasAttribute("data-close")){ closeMask(m); if(m.id==="mMaster") render(); }
+  });
+});
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") document.querySelectorAll(".mask.on").forEach(m=>{closeMask(m); if(m.id==="mMaster") render();});
+});
+
+/* KPI master */
+document.getElementById("btnMaster").addEventListener("click", ()=>{ renderMaster(); openMask("mMaster"); });
+function renderMaster(){
+  document.getElementById("masterSbu").textContent=curSbu;
+  document.getElementById("copyFrom").innerHTML = state.sbus.filter(s=>s!==curSbu).map(s=>`<option>${esc(s)}</option>`).join("")
+    || `<option value="">— none —</option>`;
+  const rows=kpiList(curSbu);
+  document.getElementById("masterBody").innerHTML = rows.map(k=>`
+    <tr data-id="${k.id}">
+      <td><input class="cell" data-k="name" style="min-width:220px" value="${esc(k.name)}"></td>
+      <td><input class="cell" data-k="dept" style="min-width:95px" value="${esc(k.dept)}"></td>
+      <td><input class="cell" data-k="sec" style="min-width:80px" value="${esc(k.sec)}"></td>
+      <td><input class="cell" data-k="measure" style="min-width:65px" value="${esc(k.measure)}"></td>
+      <td><input class="cell" data-k="baseline" style="min-width:80px" value="${esc(k.baseline)}"></td>
+      <td><input class="cell" data-k="srf" style="min-width:80px" value="${esc(k.srf)}"></td>
+      <td><input class="cell" data-k="target" style="min-width:90px" value="${esc(k.target)}"></td>
+      <td><select class="cell" data-k="dir"><option value="high"${k.dir==="high"?" selected":""}>↑</option><option value="low"${k.dir==="low"?" selected":""}>↓</option></select></td>
+      <td><select class="cell" data-k="basis"><option value="abs"${k.basis!=="rel"?" selected":""}>abs</option><option value="rel"${k.basis==="rel"?" selected":""}>rel</option></select></td>
+      <td><input class="cell" data-k="weight" style="min-width:60px;text-align:right" value="${esc(k.weight)}" inputmode="decimal"></td>
+      <td><select class="cell" data-k="calc"><option value=""${!k.calc?" selected":""}>—</option><option value="weighted"${k.calc==="weighted"?" selected":""}>weighted</option></select></td>
+      <td><button class="btn sm danger" data-del>✕</button></td>
+    </tr>`).join("");
+}
+document.getElementById("masterBody").addEventListener("input", ev=>{
+  const inp=ev.target.closest("[data-k]"); if(!inp) return;
+  const id=ev.target.closest("tr").dataset.id;
+  const k=state.kpis.find(x=>x.id===id); if(!k) return;
+  k[inp.dataset.k]=inp.value; save();
+});
+document.getElementById("masterBody").addEventListener("change", ev=>{
+  const inp=ev.target.closest("[data-k]"); if(!inp) return;
+  const id=ev.target.closest("tr").dataset.id;
+  const k=state.kpis.find(x=>x.id===id); if(!k) return;
+  k[inp.dataset.k]=inp.value; save();
+});
+document.getElementById("masterBody").addEventListener("click", ev=>{
+  if(!ev.target.hasAttribute("data-del")) return;
+  const id=ev.target.closest("tr").dataset.id;
+  const k=state.kpis.find(x=>x.id===id);
+  if(!k || !window.confirm('Delete KPI "'+k.name+'"?')) return;
+  state.kpis=state.kpis.filter(x=>x.id!==id);
+  Object.keys(state.entries).forEach(m=>{ if(state.entries[m]) delete state.entries[m][id]; });
+  save(); renderMaster();
+});
+document.getElementById("btnAddKpi").addEventListener("click", ()=>{
+  state.kpis.push({id:uid(),sbu:curSbu,dept:"Operations",sec:"OPEX",name:"New KPI",measure:"Value",
+    baseline:"",srf:"Monthly",target:"",dir:"high",basis:"abs",weight:0,calc:""});
+  save(); renderMaster();
+  const rows=document.querySelectorAll("#masterBody tr"); rows[rows.length-1].querySelector("input").select();
+});
+document.getElementById("btnCopy").addEventListener("click", ()=>{
+  const from=document.getElementById("copyFrom").value;
+  if(!from){ toast("No SBU to copy from","err"); return; }
+  const exist=new Set(kpiList(curSbu).map(k=>k.name));
+  let n=0;
+  state.kpis.filter(k=>k.sbu===from).forEach(k=>{
+    if(exist.has(k.name)) return;
+    state.kpis.push(Object.assign({},k,{id:uid(),sbu:curSbu})); n++;
+  });
+  save(); renderMaster(); toast(n+" KPIs copied from "+from,"ok");
+});
+
+/* settings */
+document.getElementById("btnSettings").addEventListener("click", ()=>{
+  document.getElementById("cfgUrl").value=state.cfg.url||"";
+  document.getElementById("gsCode").textContent=GS_CODE;
+  document.getElementById("lastSync").textContent = state.cfg.lastSync? "Last sync: "+state.cfg.lastSync : "Never synced.";
+  openMask("mSettings");
+});
+document.getElementById("btnSaveUrl").addEventListener("click", ()=>{
+  state.cfg.url=document.getElementById("cfgUrl").value.trim(); save();
+  toast(state.cfg.url?"URL saved":"URL cleared", state.cfg.url?"ok":"");
+});
+document.getElementById("btnBackup").addEventListener("click", ()=>{
+  dl(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}), "kpi_backup_"+new Date().toISOString().slice(0,10)+".json");
+});
+document.getElementById("fileRestore").addEventListener("change", ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+      const s=JSON.parse(r.result);
+      if(!s.kpis) throw new Error("bad file");
+      state=s; save(); curSbu=state.sbus[0]; curMonth=state.defaultMonth||state.months[0]; render(); toast("Backup restored","ok");
+    }catch(e){ toast("Invalid backup file","err"); } };
+  r.readAsText(f); ev.target.value="";
+});
+document.getElementById("btnReset").addEventListener("click", ()=>{
+  if(!window.confirm("Reset everything back to the sample data?")) return;
+  state=seed(); save(); curSbu=state.sbus[0]; curMonth=state.defaultMonth; render(); toast("Reset done","ok");
+});
+
+/* google sheet sync */
+document.getElementById("btnPush").addEventListener("click", pushMonth);
+document.getElementById("btnPush2").addEventListener("click", pushMonth);
+document.getElementById("btnPull").addEventListener("click", pullAll);
+document.getElementById("btnPull2").addEventListener("click", pullAll);
+document.getElementById("btnPushMaster").addEventListener("click", pushMaster);
+document.getElementById("btnTest").addEventListener("click", async ()=>{
+  const url=(state.cfg.url||document.getElementById("cfgUrl").value.trim());
+  if(!url){ toast("Save the Web App URL first","err"); return; }
+  try{
+    const r=await (await fetch(url+"?action=ping")).json();
+    toast(r.ok? "Connected: "+r.spreadsheet : ("Error: "+r.error), r.ok?"ok":"err");
+  }catch(e){     toast("Connection failed: "+e.message+" (check deployment = Anyone)","err"); }
+});
+
+/* submit / reopen */
+document.getElementById("btnSubmit").addEventListener("click", submitMonth);
+function filledCount(){
+  let n=0;
+  kpiList(curSbu).forEach(k=>{ if(num(k.calc==="weighted"?calcActual(k):entryOf(curMonth,k.id).a)!==null) n++; });
+  return n;
+}
+async function submitMonth(){
+  if(isSub(curMonth,curSbu)) return;
+  const ks=kpiList(curSbu);
+  if(!ks.length) return toast("No KPIs defined for "+curSbu,"err");
+  const filled=filledCount();
+  if(!filled) return toast("Enter at least one Actual value before submitting","err");
+  if(!window.confirm("Submit data for "+fmtMonth(curMonth)+" / "+curSbu+"\n("+filled+" of "+ks.length+" KPIs have actuals)\n\nThe month will be locked for editing.")) return;
+  const key=submitKey(curMonth,curSbu);
+  const stamp=new Date().toLocaleString();
+  state.submits[key]=stamp;
+  try{
+    const rows=ks.map(rowPayload);
+    const r=await post({action:"save",rows});
+    if(!r.ok){
+      delete state.submits[key]; save(); render();
+      return toast("Submit failed: "+r.error+" — nothing was marked as submitted","err");
+    }
+    state.cfg.lastSync=stamp; save(); render();
+    toast("Submitted "+filled+" KPIs → "+fmtMonth(curMonth)+" / "+curSbu,"ok");
+  }catch(e){
+    delete state.submits[key]; save(); render();
+  }
+}
+async function reopenMonth(){
+  if(!window.confirm("Reopen "+fmtMonth(curMonth)+" / "+curSbu+" for editing?\n\nA new submission will overwrite the previous one in the sheet.")) return;
+  const key=submitKey(curMonth,curSbu);
+  delete state.submits[key];
+  try{
+    const r=await post({action:"save",rows:kpiList(curSbu).map(rowPayload)});
+    if(r.ok) state.cfg.lastSync=new Date().toLocaleString();
+  }catch(e){}
+  save(); render(); toast("Reopened — you can edit this month again","ok");
+}
+
+function rowPayload(k){
+  const e=entryOf(curMonth,k.id);
+  const actual=k.calc==="weighted"?calcActual(k):e.a;
+  const p=achievementOf(k,actual); const st=statusOf(p);
+  return {
+    "Month-Year":fmtMonth(curMonth), "SBU":curSbu, "Department":k.dept, "Section":k.sec,
+    "KPI Name":k.name, "Measure KPI":k.measure, "Baseline":k.baseline, "SRF":k.srf,
+    "KPI Target":k.target, "Direction":k.dir==="low"?"↓":"↑", "Basis":k.basis,
+    "Weight %":k.weight, "Actual":actual, "KPI Achievement":p===null?(e.ach||""):pctTxt(p),
+    "KPI Status":st?STATUS[st].label:(e.st||""), "Supporting File":e.link,
+    "Root Cause":e.cause, "Action Plan":e.act, "Remarks":e.rem,
+    "Submitted At":subTime(curMonth,curSbu)
+  };
+}
+async function post(payload){
+  const url=(state.cfg.url||"").trim();
+  if(!url){ openMask("mSettings"); toast("Add your Google Sheet Web App URL first","err"); throw new Error("no url"); }
+  try{
+    const r=await fetch(url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+    return await r.json();
+  }catch(e){
+    const r=await fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+    return {ok:true,note:"sent (opaque response)"};
+  }
+}
+async function pushMonth(){
+  try{
+    const rows=kpiList(curSbu).map(rowPayload);
+    const r=await post({action:"save",rows});
+    if(!r.ok) return toast("Sync failed: "+r.error,"err");
+    state.cfg.lastSync=new Date().toLocaleString(); save(); syncPill();
+    toast(rows.length+" rows upserted → "+fmtMonth(curMonth)+" / "+curSbu,"ok");
+  }catch(e){}
+}
+async function pushMaster(){
+  try{
+    const kpis=state.kpis.map(k=>({sbu:k.sbu,dept:k.dept,sec:k.sec,name:k.name,measure:k.measure,
+      baseline:k.baseline,srf:k.srf,target:k.target,dir:k.dir==="low"?"↓":"↑",basis:k.basis,weight:k.weight,calc:k.calc}));
+    const r=await post({action:"saveMaster",kpis});
+    if(!r.ok) return toast("Master sync failed: "+r.error,"err");
+    state.cfg.lastSync=new Date().toLocaleString(); save(); syncPill();
+    toast(kpis.length+" KPI master rows saved","ok");
+  }catch(e){}
+}
+async function pullAll(){
+  try{
+    const url=(state.cfg.url||"").trim();
+    if(!url){ openMask("mSettings"); return toast("Add your Web App URL first","err"); }
+    const r=await (await fetch(url+"?action=list")).json();
+    if(!r.ok) return toast("Load failed: "+r.error,"err");
+    let months=0, entries=0, kmaster=0, subs=0;
+
+    (r.master||[]).forEach(m=>{
+      const sbu=String(m["SBU"]||"").trim(); if(!sbu) return;
+      if(!state.sbus.includes(sbu)) state.sbus.push(sbu);
+      let k=state.kpis.find(x=>x.sbu===sbu && x.name===m["KPI Name"]);
+      if(!k){ k={id:uid(),sbu,dept:"Operations",sec:"OPEX",name:m["KPI Name"]||"Unnamed",measure:"",baseline:"",srf:"",target:"",dir:"high",basis:"abs",weight:0,calc:""}; state.kpis.push(k); }
+      k.dept=m["Department"]||k.dept; k.sec=m["Section"]||k.sec; k.measure=m["Measure KPI"]||k.measure;
+      k.baseline=m["Baseline"]!==undefined?m["Baseline"]:k.baseline; k.srf=m["SRF"]||k.srf;
+      k.target=m["KPI Target"]!==undefined?m["KPI Target"]:k.target;
+      k.dir=(m["Direction"]==="↓"||m["Direction"]==="low")?"low":"high";
+      k.basis=(m["Basis"]==="rel"||m["Basis"]==="relative")?"rel":"abs";
+      k.weight=num(m["Weight %"])||0; k.calc=m["Calc"]||"";
+      kmaster++;
+    });
+
+    (r.rows||[]).forEach(row=>{
+      const sbu=String(row["SBU"]||"").trim(); const name=String(row["KPI Name"]||"").trim();
+      const monthRaw=String(row["Month-Year"]||"").trim(); if(!sbu||!name||!monthRaw) return;
+      const month=monthKey(monthRaw);
+      if(!month) return;
+      if(!state.months.includes(month)){ state.months.push(month); months++; }
+      if(!state.entries[month]) state.entries[month]={};
+      if(!state.sbus.includes(sbu)) state.sbus.push(sbu);
+      let k=state.kpis.find(x=>x.sbu===sbu && x.name===name);
+      if(!k){
+        k={id:uid(),sbu,dept:row["Department"]||"Operations",sec:row["Section"]||"OPEX",name,
+           measure:row["Measure KPI"]||"",baseline:row["Baseline"]||"",srf:row["SRF"]||"",
+           target:row["KPI Target"]||"",dir:"high",basis:"abs",weight:num(row["Weight %"])||0,calc:""};
+        state.kpis.push(k);
+      }
+      const e=entryOf(month,k.id);
+      e.a=row["Actual"]!==undefined&&row["Actual"]!==null?String(row["Actual"]):e.a;
+      e.link=row["Supporting File"]||e.link; e.cause=row["Root Cause"]||e.cause;
+      e.act=row["Action Plan"]||e.act; e.rem=row["Remarks"]||e.rem;
+      e.ach=row["KPI Achievement"]||""; e.st=row["KPI Status"]||"";
+      const sat=row["Submitted At"];
+      if(sat && !subTime(month,sbu)){ state.submits[submitKey(month,sbu)]=String(sat); subs++; }
+      entries++;
+    });
+    if(months) state.months.sort();
+    state.cfg.lastSync=new Date().toLocaleString(); save(); render();
+    toast("Loaded "+entries+" entries, "+kmaster+" master rows"+(subs?", "+subs+" submitted":(months?", +"+months+" new months":"")),"ok");
+  }catch(e){ toast("Load failed: "+e.message,"err"); }
+}
+function monthKey(txt){
+  let m=/^(\d{4})-(\d{1,2})$/.exec(txt); if(m) return m[1]+"-"+String(m[2]).padStart(2,"0");
+  m=/^([A-Za-z]{3,})[ ,\-]+(\d{4})$/.exec(txt);
+  if(m){
+    const i=MONTHS.findIndex(x=>x.toLowerCase().startsWith(m[1].slice(0,3).toLowerCase()));
+    if(i>-1) return m[2]+"-"+String(i+1).padStart(2,"0");
+  }
+  const d=new Date(txt); if(!isNaN(d)) return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+  return null;
+}
+
+/* ============================ boot ============================ */
+render();
+</script>
+</body>
+</html>
